@@ -1,0 +1,46 @@
+Verbatim output from `megalens_status`:
+
+```json
+{
+  "status": "ready",
+  "version": "0.5.0",
+  "executor": "Claude Opus",
+  "tiers": {
+    "free": "2 specialist engines + final judge",
+    "standard": "3 specialist engines + council review + final judge",
+    "deep": "3 specialist engines + full council + final judge"
+  },
+  "engines": {
+    "specialists": 11,
+    "council": 2,
+    "total": 14
+  },
+  "secondaryTools": [
+    {
+      "id": "codex",
+      "displayName": "Codex CLI",
+      "applicable": true,
+      "installed": true,
+      "version": "codex-cli 0.124.0",
+      "resolvedPath": "/usr/lib/node_modules/@openai/codex/bin/codex.js",
+      "consent": "allow",
+      "consentSource": "legacy-migration",
+      "effectiveEnabled": true,
+      "howToChange": "Run megalens_consent { tool: 'codex', decision: 'allow' | 'decline' } or edit ~/.megalens.json (secondaryToolConsent.codex)."
+    },
+    {
+      "id": "gemini",
+      "displayName": "Gemini CLI",
+      "applicable": true,
+      "installed": true,
+      "version": "0.36.0",
+      "resolvedPath": "/usr/lib/node_modules/@google/gemini-cli/bundle/gemini.js",
+      "consent": "allow",
+      "consentSource": "legacy-migration",
+      "effectiveEnabled": true,
+      "howToChange": "Run megalens_consent { tool: 'gemini', decision: 'allow' | 'decline' } or edit ~/.megalens.json (secondaryToolConsent.gemini)."
+    }
+  ],
+  "summary": "MegaLens ready: 11 specialists, 2 council judge(s), Claude Opus as final judge."
+}
+```

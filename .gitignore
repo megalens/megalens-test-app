@@ -1,0 +1,7 @@
+node_modules/
+app.db
+uploads/
+logs/
+.cursor/
+*.json
+!package.json

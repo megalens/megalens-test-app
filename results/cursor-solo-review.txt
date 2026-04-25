@@ -1,0 +1,26 @@
+The file is labeled as intentionally vulnerable; here is a concise security review.
+
+| Line(s) | Severity | Type | Explanation |
+|--------|----------|------|---------------|
+| 17, 233 | **Critical** | Hardcoded secret + disclosure | Static `JWT_SECRET` and returned on unauthenticated `/api/config`, enabling token forgery. |
+| 56–62 | **Critical** | Privilege escalation + SQLi | `role` from the client is stored as-is (e.g. `admin`); register query builds SQL with string concatenation. |
+| 73 | **Critical** | SQL injection | Login query interpolates `username` into raw SQL (auth bypass / data exfiltration). |
+| 110–113 | **Critical** | IDOR + sensitive data | Any authenticated user can read any user row, including `password` hash. |
+| 115–118 | **Critical** | IDOR | Any authenticated user can delete any user by id. |
+| 122–131 | **Critical** | Path traversal | `filename` from the body is joined under uploads; `../` sequences can write outside the intended user folder. |
+| 139–142 | **Critical** | Arbitrary file read | `filepath` from query is read with no restriction to the caller’s upload scope. |
+| 145–148 | **Critical** | OS command injection | `pattern` is embedded in a shell `find` via `execSync`. |
+| 183–188 | **Critical** | Broken access control | `/api/admin/reset-password` only uses `authenticate`; any user can reset another user’s password (SQLi on `userId`/`hashed` as well). |
+| 190–194 | **Critical** | SQLi + weak authz | Dynamic `` `SELECT * FROM ${table}` `` with no admin check; table/column injection. |
+| 207–224 | **Critical** | Unauthenticated SSRF | `/api/webhook` has no auth/signature; `callbackUrl` drives `http.get` (internal network / cloud metadata). |
+| 229–236 | **Critical** | Information disclosure | `/api/config` is public and leaks `jwtSecret` and `dbPath`. |
+| 105–107 | **High** | Excessive data exposure | Lists all users with `api_key` and `balance` to any authenticated caller. |
+| 57, 185 | **High** | Weak cryptography | `bcrypt.hashSync(..., 2)` uses far too few rounds for password storage. |
+| 153–172 | **High** | Race / integrity | Balance check and two updates are not in one atomic DB transaction (double-spend / inconsistent balances under concurrency). |
+| 196–203 | **High** | Dangerous admin surface | Admin-only `execSync(cmd)` is remote command execution if the admin account is compromised. |
+| 78–81 | **Medium** | Session management | JWT is issued with no `expiresIn`, so tokens do not expire by time. |
+| 153–172 | **Medium** | Input validation | `amount` / `toUserId` are not validated (type, sign, bounds), enabling odd or abusive transfers. |
+| 207–215 | **Medium** | DoS / abuse | Unbounded webhook logging can fill disk; no rate limiting. |
+| 75, 84 | **Low** | User enumeration | Distinct errors for unknown user vs wrong password aid account guessing. |
+
+**Note:** The banner at lines 12–15 states these issues are intentional for training/review.
