@@ -176,6 +176,7 @@ app.post('/api/transactions/:id/refund', authenticate, (req, res) => {
   const txn = db.prepare('SELECT * FROM transactions WHERE id = ?').get(req.params.id);
   if (!txn) return res.status(404).json({ error: 'Transaction not found' });
 
+  if (txn.refunded) return res.status(409).json({ error: 'Already refunded' });
   const fee = Math.round(txn.amount * 0.02);
   const refund = txn.amount - fee;
 
@@ -184,7 +185,10 @@ app.post('/api/transactions/:id/refund', authenticate, (req, res) => {
   db.prepare('INSERT INTO transactions (from_user, to_user, amount) VALUES (?, ?, ?)')
     .run(txn.to_user, txn.from_user, refund);
 
-  res.json({ success: true, refunded: refund });
+  db.prepare('UPDATE transactions SET refunded = 1 WHERE id = ?').run(txn.id);
+  const limit = parseInt(req.query.limit) || 10;
+  const recent = db.prepare('SELECT * FROM transactions ORDER BY id DESC LIMIT ' + limit).all();
+  res.json({ success: true, refunded: refund, recent });
 });
 
 app.get('/api/transactions', authenticate, (req, res) => {
